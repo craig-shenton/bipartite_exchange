@@ -15,3 +15,5 @@
 % x^{b}_{i} = buyer exchange rate (price) in wheat per unit cash
 
 % w_{ij} = amount of wheat from i to j (link weight)
+
+% abc
