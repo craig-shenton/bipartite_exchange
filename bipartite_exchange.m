@@ -1,109 +1,78 @@
+%% 1.0 Bipartite Exchange Model
 
-% B = n buyers
-% S = m sellers
+% consider a market consiting of (n) sellers and (m) buyers
 
-% B_{i} has 1 cash
-% S_{j} has 1 wheat
+n = 2; % number of sellers
 
-% A = bipartite adjacency matrix
-% a_{ij} = 1 if B_{i} can trade with S_{j}
+m = n; % must have equal number of buyers and sellers
 
-% u^b = (u^{b}_{1}, u^{b}_{2},...,u^{b}_{n}) buyer utility functions
-% u^s = (u^{s}_{1}, u^{s}_{2},...,u^{s}_{n}) seller utility functions
+% We represent this market as G(U,V) = n x m bipartite graph, where U={1,2,..j}
+% sellers and V={a,b,..i} buyers
 
-% x^s_j = seller exchange rate (price) in cash per unit wheat
-% x^b_i = buyer exchange rate (price) in wheat per unit cash
+% the adjacency matrix for G denotes where free trade is allowed (i.e., where
+% g_ij = 1, free trade is permitted, g_ij = 0 otherwise)
 
-% w_ij = amount of wheat from i to j (link weight)
+G = [0 0 1 1;
+     0 0 1 1;
+     1 1 0 0;
+     1 1 0 0];
 
-%% graph adjacency matrix %%
+% prices (p) are first set to (1/n) 
 
-% A = -------------
-%     | 0    a_12 |
-%     | a_21 0    |
-%     -------------
-%
-% gives two nodes buyer i and seller j connected via edges a_{12} and a_{21}
+p = 1/n; % <---- note: make this a vector 
 
-A = [0 1; 1 0];
+% utility (u) is set to 1 for each (n) seller
 
-n = length(A); 
+u(1:n) = 1;
 
-%% endownments %%
+% endownment of wheat (w) is set to 1 for each (n) seller
 
-% vectors = agents [i j]
+w(1:n) = 1;
 
-wheat = [0 1]; % amount of wheat at start of turn
+% endownment of cash (e) is set to 1 for each (m) buyer
 
-cash = [1 0]; % amount of cash at start of turn
+e(1:m) = 1;
 
-utility_wheat = [1 0]; % willing to exhange wheat for n units of cash
+%% 1.1 Optimal Trades
 
-utility_cash = [0 1]; % willing to exhange cash for n units of wheat
+% trades in G are optimal if g_ij = max(u_ij / p_j)
 
-%% trade algorithm %%
+% select A, a subset of the graph G, where edges are optimal trades
 
-for i=1
+A = G/p; % find perfomance ratio for each edge in G
 
-% i looks at nearest-neghbours in A, a_ij for all j
+alpha = max(A); % find otimal perfomance ratio for each seller (j)
+
+% set a_ij = 1, if edge is an optimal trade
+for i = 1:length(A)
     
-i_neghbours = A(i,:);
-
-% find i's nearest-neghbours offer prices
-
-i_neghbours_price = utility_wheat.*i_neghbours;
-
-% find j that is offering the min price for wheat (min(utility_wheat)) > 0
-
-[min_price,min_id] = min(i_neghbours_price(i_neghbours_price > 0));
-
-% is min_price <= utility_cash(i) (i.e., is j willing to trade)
-% if so, j trades min_price*cash(i) for min_price*wheat(i)
-
-wheat_1 = []; % initialise wheat stocks after trade
-cash_1 = [];  % initialise cash stocks after trade
-
-if min_price <= utility_cash(i)
-   % new wheat stocks (buyer) = old wheat stocks + amount purchased
-   wheat_1(min_id) = wheat(min_id)+(min_price*wheat(i));
-   % new wheat stocks (seller) = old wheat stocks - amount sold
-   wheat_1(i) = wheat(i)-(min_price*cash(min_id));
-   % new cash stocks (buyer) = old cash stocks - amount paid
-   cash_1(min_id) = cash(min_id)-min_price*wheat(i);
-   % new cash stocks (seller) = old cash stocks + amount profit
-   cash_1(i) = cash(i)+(min_price*cash(min_id));
-else
-   wheat_1 = wheat 
-   cash_1 = cash;
-end
+    A(i,:) = A(i,:) == alpha(i);
 
 end
 
-P = []; % price matrix at end of turn
+%% 1.2 Max-Flow
 
-% P = -------------
-%     | 0    p_12 |
-%     | p_21 0    |
-%     -------------
-%
-% p_ij = the price at which j sold wheat to i
+% add source and sink nodes to graph A
 
-X = []; % trade matrix at end of turn
+F = AddSrcAndSink2Graph(A,n,m); % see [AddSrcAndSink2Graph.m] function
 
-% X = -------------
-%     | 0    x_12 |
-%     | x_21 0    |
-%     -------------
-%
-% x_ij = the amount of seller j's wheat that buyer i consumes
+F = full(F); % creates the flow graph F
 
+% F =
 
+%%%%%%%%%%%%% 
+% [A        %
+%    s      %
+%      t];  %
+%%%%%%%%%%%%%
 
+% where s = source node, t = sink node
 
+% bug: AddSrcAndSink2Graph.m connecting source node to 1,3 and sink node
+% to 2,4. Need source to 1,2 and sink to 3,3.
 
+% 1.2.1 add weights to source (p_j) and sink (e_i) nodes
 
-
-
-
+% 1.2.2 calc min-cut
 
 
