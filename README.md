@@ -11,6 +11,6 @@ Based on work by:
 
 * Siddharth Suri, "The effects of network topology on strategic behavior" (2007).
 
-Primal-Dual Algrithm delevoped by:
+Primal-Dual Algorithm delevoped by:
 
 * Devanur, Papadimitriou, Saberi & Vazirani. "Market equilibrium via a primal-dual-type algorithm" (2002).
